@@ -32,6 +32,11 @@ def recommend_ui():
 @app.route("/recommend_books", methods=["post"])
 def recommend():
     user_input = request.form.get("user_input")
+    if user_input not in pt.index:
+        # Handle case where user input is not found in the index
+        error_message = f"Book '{user_input}' not found."
+        return render_template("recommend.html", error_message=error_message)
+
     index = np.where(pt.index == user_input)[0][0]
     similar_items = sorted(
         list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True
@@ -46,8 +51,6 @@ def recommend():
         item.extend(list(temp_df.drop_duplicates("Book-Title")["Image-URL-M"].values))
 
         data.append(item)
-
-    print(data)
 
     return render_template("recommend.html", data=data)
 
